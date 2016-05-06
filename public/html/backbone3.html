@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>backbone-collection</title>
+    </head>
+
+    <body>
+        <a href="#/manual">manual</a>
+    </body>
+    <script src="//cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="//cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+    <script>
+        (function($) {
+            var AppRouter = Backbone.Router.extend({
+
+                routes: {
+                    "posts/:id": "getPost",
+                    //下面对应的链接为<a href="#/download/user/images/hey.gif">download gif</a>
+                    "manual": "manual",
+                    "*actions": "defaultRoute"
+                },
+
+                getPost: function(id) {
+                    alert(id);
+                },
+
+                defaultRoute: function(actions) {
+                    alert(actions);
+                },
+
+                manual: function() {
+                    alert("call manual");
+                    //这里需要解释的是navigate后面的两个参数。trigger表示触发事件，如果为false，则只是url变化，并不会触发事件，replace表示url替换，而不是前进到这个url，意味着启用该参数，浏览器的history不会记录这个变动。
+                    app_router.navigate("/posts/" + 404, {
+                        trigger: true,
+                        replace: true
+                    });
+                }
+            });
+
+            var app_router = new AppRouter;
+            Backbone.history.start();
+
+        })(jQuery);
+
+    </script>
+
+</html>

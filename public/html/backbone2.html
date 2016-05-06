@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>backbone-collection</title>
+    </head>
+
+    <body>
+    </body>
+    <script src="//cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="//cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+    <script>
+        (function($) {
+            //collection是一个简单的models的有序集合
+            //1、一个简单的例子
+
+            Book = Backbone.Model.extend({
+                default: {
+                    title: 'default'
+                },
+                initialize: function() {
+                    //alert('Hey, you create me!');
+                }
+            });
+            BookShelf = Backbone.Collection.extend({
+                model: Book
+            });
+
+            var book1 = new Book({
+                title: 'book1'
+            });
+            var book2 = new Book({
+                title: 'book2'
+            });
+            var book3 = new Book({
+                title: 'book3'
+            });
+
+            var bookShelf = new BookShelf([book1, book2, book3]);
+
+            var showAllBooks = function() {
+                console.log(321);
+                bookShelf.each(function(book){
+                    alert(book.get('title'));
+                });
+            }
+            bookShelf.on('reset', showAllBooks);//???????????????????????
+            //2、使用fetch从服务器端获取数据,使用reset渲染
+
+            bookShelf.fetch({
+                url: '/getbooks/',
+                reset: true,
+                success: function(collection, res) {
+                    collection.each(function(book) {
+                        console.log(book.get('title'));
+                    });
+                },
+                error: function() {
+                    alert('error');
+                }
+            });
+            var NewBooks = Backbone.Collection.extend({
+                model: Book,
+                url: '/books/'
+            });
+
+            var books = new NewBooks;
+
+            var onebook = books.create({
+                title: "I'm coming",
+            });
+            // console.log(onebook)
+        })(jQuery);
+
+    </script>
+
+</html>

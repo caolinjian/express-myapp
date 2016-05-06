@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>backbone.js-Hello World</title>
+        <style>
+            .pager {
+                width: 500px;
+                display: block;
+                margin: 20px auto;
+                vertical-align: middle;
+            }
+
+            .pager .pageA {
+                display: inline-block;
+                font-size: 14px;
+                text-align: center;
+                vertical-align: middle;
+                height: auto;
+                width: auto;
+                cursor: pointer;
+            }
+
+            .pager a {
+                display: block;
+                width: 16px;
+                height: 16px;
+                margin: 5px;
+            }
+
+            .pager .pageA span {
+                display: inline-block;
+                color: #999999;
+                padding: 3px 6px;
+                border: 1px solid #999999;
+            }
+            .pager .disable {
+                cursor: not-allowed;
+            }
+            .pager .pageActive {
+                background-color: #37BCAB;
+            }
+
+            .pager .pageActive span {
+                color: #FFFFFF;
+                border: 1px solid #37BCAB;
+            }
+
+            ol,
+            ul {
+                list-style: none;
+            }
+
+            .memberListHead {
+                margin: 20px 30px 0px 30px;
+                height: 30px;
+                background: #EBEEF0;
+                color: #212121;
+            }
+
+            .memberListHead li {
+                width: 33%;
+                height: 100%;
+                line-height: 30px;
+                cursor: default;
+                letter-spacing: 2px;
+                display: -moz-inline-stack;
+                display: inline-block;
+                vertical-align: top;
+                zoom: 1;
+                text-align: center;
+            }
+
+            .memberListBody {
+                margin: 0 30px;
+            }
+
+            .memberListBody .memberColumn {
+                padding-top: 20px;
+                padding-bottom: 20px;
+                line-height: 20px;
+                border-bottom: 1px solid #DDDDDD;
+                color: #333333;
+            }
+
+            .memberCell {
+                display: inline-block;
+                width: 33%;
+                text-align: center;
+                vertical-align: middle;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <ul class="memberListHead">
+            <li class="memberName">姓名</li>
+            <li class="memberEmail">邮箱</li>
+            <li class="memberPhone">手机号</li>
+        </ul>
+        <ul class='memberListBody'>
+        </ul>
+        <div class="pager"></div>
+    </body>
+    <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="http://cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="http://cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+    <!--分页模板-->
+    <script type="text/template" id="paginator">
+        <a class="<%= currentPage==1?'pageA disable':'pageA' %>" data-index="1">
+            <span>首页</span>
+        </a>
+        <a class="<%= currentPage==1?'pageA disable':'pageA' %>" data-index="<%= currentPage-1 %>">
+            <span>上一页</span>
+        </a>
+        <% for(var i=0;i<showList.length;i++){ %>
+            <a class="<%= currentPage==showList[i]?'pageA pageActive disable':'pageA' %>" data-index="<%= showList[i] %>">
+                <span>
+                    <%= showList[i] %>
+                </span>
+            </a>
+        <% } %>
+        <a class="<%= currentPage==totalPage?'pageA disable':'pageA' %>" data-index="<%= currentPage+1 %>">
+            <span>下一页</span>
+        </a>
+        <a class="<%= currentPage==totalPage?'pageA disable':'pageA' %>" data-index="<%= totalPage %>">
+            <span>尾页</span>
+        </a>
+    </script>
+    <script>
+        (function($) {
+            var memberContentTemplate =
+                "<span class='memberCell memberNameCell tooLongHidden'>" +
+                "<span class='updateMemberName'><%=memberName%></span>" +
+                "</span>" +
+                "<span class='memberCell memberEmailCell tooLongHidden'>" +
+                "<span class='updateMemberEmail'><%=memberEmail%></span>" +
+                "</span>" +
+                "<span class='memberCell memberPhoneCell'>" +
+                "<span class='updateMemberPhone'><%=memberPhone%></span>" +
+                "</span>";
+            var MemberItemModel = Backbone.Model.extend({
+                defaults: {
+                    memberName: "",
+                    memberEmail: "",
+                    memberPhone: ""
+                }
+            })
+            var MemberItemCollection = Backbone.Collection.extend({
+                url: "/member/list",
+                model: MemberItemModel,
+                parse: function(response) {
+                    return response.list;
+                }
+            })
+            var MemberItemView = Backbone.View.extend({
+                tagName: "li",
+                className: "memberColumn",
+                initialize: function() {},
+                render: function() {
+                    this.$el.html(_.template(memberContentTemplate)(this.model.toJSON()));
+                    return this.el;
+                },
+            });
+
+            var PaginatorModel = Backbone.Model.extend({
+                defaults: {
+                    size: 5,
+                    currentPage: 1, //第一页 从1开始计数不是0
+                    showPageA: 5, //最多显示多少个按钮
+                    total: 10
+                }
+            });
+            var PaginatorView = Backbone.View.extend({
+                el: '.pager',
+                events:{
+                    'click .pageA':'changePage'
+                },
+                template: _.template($('#paginator').html()),
+                initialize: function() {
+                    var self = this;
+                    self.setTotalPage();
+                    self.model.bind('change', function() {
+                        self.setTotalPage();
+                    });
+                },
+                changePage:function(ev){
+                    if($(ev.currentTarget).hasClass('disable')){
+                        return false;
+                    }
+                    this.model.attributes.pageChange($(ev.currentTarget).data('index'))
+                },
+                render: function(page) {
+                    this.$el.html(this.template(this.model.toJSON()));
+                },
+                setTotalPage: function() {
+                    var showList=[];
+                    var totalPage=Math.floor((this.model.get('total') - 1) / this.model.get('size')) + 1;
+                    var currentPage=this.model.get('currentPage');
+                    var showPageA=this.model.get('showPageA');
+                    if(totalPage<=showPageA||currentPage<Math.floor(showPageA/2)+1){
+                        for(var i=1;i<=totalPage&&showList.length<=showPageA-1;i++){
+                            showList.push(i)
+                        }
+                    }else if(currentPage>totalPage-Math.ceil(showPageA/2)){
+                        for(var i=totalPage;showList.length<=showPageA-1;i--){
+                            showList.unshift(i)
+                        }
+                    }else{
+                        for(var i=currentPage-Math.floor(showPageA/2);i<=currentPage+Math.ceil(showPageA/2)-1&&showList.length<=showPageA-1;i++){
+                            showList.push(i)
+                        }
+                    }
+                    this.model.set('totalPage', totalPage);
+                    this.model.set('showList', showList);
+                }
+            });
+            var paginatorModel, paginatorView;
+
+            var memberItemCollection = new MemberItemCollection();
+            var memberModel = new MemberItemModel();
+            var AppView = Backbone.View.extend({
+                el: 'body',
+                initialize: function() {
+                    this._load(1);
+                },
+                _load: function(page) {
+                    var self = this;
+                    memberItemCollection.fetch({
+                        reset: true,
+                        data: {
+                            page: page
+                        },
+                        success: function(collection, res) {
+                            if (!paginatorView) {
+                                paginatorModel = new PaginatorModel({
+                                    size: res.size,
+                                    currentPage: res.currentPage,
+                                    total: res.total,
+                                    pageChange: function(page) {
+                                        self._load(page)
+                                    }
+                                })
+                                paginatorView = new PaginatorView({
+                                    model: paginatorModel
+                                });
+                            } else {
+                                paginatorModel.set('size', res.size)
+                                paginatorModel.set('currentPage', res.currentPage)
+                                paginatorModel.set('total', res.total)
+                            }
+                            paginatorView.render(page);
+                            self.renderList();
+                        },
+                        error: function(error) {
+                            self.$el.find(".memberListBody").html('');
+                        }
+                    })
+                },
+                renderList: function() {
+                    var frag = document.createDocumentFragment();
+                    memberItemCollection.each(function(item) {
+                        var memberItemView = new MemberItemView({
+                            model: item
+                        })
+                        $(frag).append(memberItemView.render());
+                    })
+                    $(".memberListBody").html(frag);
+                },
+            });
+
+            //实例化AppView
+            var appview = new AppView();
+
+        })(jQuery);
+
+    </script>
+
+</html>

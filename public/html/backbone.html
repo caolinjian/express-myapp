@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>backbone.js-Hello World</title>
+    </head>
+
+    <body>
+
+        <button id="check" style="font-size:24px;display:block;width:200px;margin:auto">报到</button>
+        <ul id="world-list">
+
+        </ul>
+    </body>
+    <script src="//cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="//cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+    <script>
+        (function($) {
+            var artist = new Backbone.Model({
+                firstName: "Wassily",
+                lastName: "Kandinsky"
+            });
+
+            artist.set({
+                birthday: "December 16, 1866"
+            });
+
+            alert(artist.toJSON());
+            alert(JSON.stringify(artist));
+            /*
+            World = Backbone.Model.extend({
+                initialize: function() {
+                    console.log(this);
+                    this.bind('change:name', function() {
+                        console.log('321321')
+                        alert(this)
+                    })
+                },
+                defaults: {
+                    name: '张三',
+                    hi: 'Hello World!'
+                }
+            });
+
+            Worlds = Backbone.Collection.extend({
+                //World对象的集合
+                initialize: function(models, options) {
+                    this.bind("add", options.view.addOneWorld);
+                }
+            });
+
+            AppView = Backbone.View.extend({
+                el: $("body"),
+                initialize: function() {
+                    //构造函数，实例化一个World集合类，并且以字典方式传入AppView的对象
+                    this.worlds = new Worlds(null, {
+                        view: this
+                    })
+                },
+                events: {
+                    "click #check": "checkIn", //事件绑定，绑定Dom中id为check的元素
+                },
+                checkIn: function() {
+                    var world_name = prompt("请问，您是哪星人?");
+                    if (!world_name) world_name = '未知';
+                    var world = new World();
+                    world.set('name', world_name);
+                    this.worlds.add(world);
+                },
+                addOneWorld: function(model) {
+                    $("#world-list").append("<li>这里是来自 <b>" + model.get('name') + "</b> 星球的问候：" + model.get('hi') + "</li>");
+                }
+            });
+            //实例化AppView
+            var appview = new AppView();*/
+        })(jQuery);
+
+    </script>
+
+</html>

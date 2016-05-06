@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>backbone-view</title>
+    </head>
+
+    <body>
+        <div id="search_container"></div>
+
+        <script type="text/template" id="search_template">
+            <ul>
+                <% _.each(labels, function(name) { %>
+                    <% if(name != "label2") {%>
+                        <li>
+                            <%= name %>
+                        </li>
+                    <% } %>
+                <% }); %>
+            </ul>
+            <input type="text" id="search_input" />
+            <input type="button" id="search_button" value="Search" />
+        </script>
+        <script src="//cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+        <script src="//cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
+        <script src="//cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+        <script>
+            (function($) {
+                //此处添加下面的试验代码
+                var SearchView = Backbone.View.extend({
+                    el: $("#search_container"),
+                    initialize: function() {
+                        var labels = ['label1', 'label2', 'label3'];
+                        this.render({
+                            labels: labels
+                        });
+                    },
+                    render: function(context) {
+                        //使用underscore这个库，来编译模板
+                        var template = _.template($("#search_template").html());
+                        //加载模板到对应的el属性中
+                        $(this.el).html(template(context));
+                    },
+                    events: { //就是在这里绑定的
+                        //定义类型为button的input标签的点击事件，触发函数doSearch
+                        'click #search_button': 'doSearch'
+
+                    },
+
+                    doSearch: function(event) {
+                        alert("search for " + $("#search_input").val());
+                    }
+                });
+                var searchView = new SearchView();
+            })(jQuery);
+
+        </script>
+    </body>
+
+</html>
