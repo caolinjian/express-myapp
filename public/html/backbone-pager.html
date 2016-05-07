@@ -34,11 +34,14 @@
                 padding: 3px 6px;
                 border: 1px solid #999999;
             }
-            .pager .disable {
-                cursor: not-allowed;
+            .pager .disable span{
+                color: #ccc;
+                border: 1px solid #ccc;
+                cursor: default;
             }
             .pager .pageActive {
                 background-color: #37BCAB;
+                cursor: default;
             }
 
             .pager .pageActive span {
@@ -106,6 +109,7 @@
     <script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/underscore.js/1.8.3/underscore-min.js"></script>
     <script src="http://cdn.bootcss.com/backbone.js/1.2.3/backbone-min.js"></script>
+    <script src="../javascripts/backbone-paginator.js"></script>
     <!--分页模板-->
     <script type="text/template" id="paginator">
         <a class="<%= currentPage==1?'pageA disable':'pageA' %>" data-index="1">
@@ -164,59 +168,7 @@
                 },
             });
 
-            var PaginatorModel = Backbone.Model.extend({
-                defaults: {
-                    size: 5,
-                    currentPage: 1, //第一页 从1开始计数不是0
-                    showPageA: 5, //最多显示多少个按钮
-                    total: 10
-                }
-            });
-            var PaginatorView = Backbone.View.extend({
-                el: '.pager',
-                events:{
-                    'click .pageA':'changePage'
-                },
-                template: _.template($('#paginator').html()),
-                initialize: function() {
-                    var self = this;
-                    self.setTotalPage();
-                    self.model.bind('change', function() {
-                        self.setTotalPage();
-                    });
-                },
-                changePage:function(ev){
-                    if($(ev.currentTarget).hasClass('disable')){
-                        return false;
-                    }
-                    this.model.attributes.pageChange($(ev.currentTarget).data('index'))
-                },
-                render: function(page) {
-                    this.$el.html(this.template(this.model.toJSON()));
-                },
-                setTotalPage: function() {
-                    var showList=[];
-                    var totalPage=Math.floor((this.model.get('total') - 1) / this.model.get('size')) + 1;
-                    var currentPage=this.model.get('currentPage');
-                    var showPageA=this.model.get('showPageA');
-                    if(totalPage<=showPageA||currentPage<Math.floor(showPageA/2)+1){
-                        for(var i=1;i<=totalPage&&showList.length<=showPageA-1;i++){
-                            showList.push(i)
-                        }
-                    }else if(currentPage>totalPage-Math.ceil(showPageA/2)){
-                        for(var i=totalPage;showList.length<=showPageA-1;i--){
-                            showList.unshift(i)
-                        }
-                    }else{
-                        for(var i=currentPage-Math.floor(showPageA/2);i<=currentPage+Math.ceil(showPageA/2)-1&&showList.length<=showPageA-1;i++){
-                            showList.push(i)
-                        }
-                    }
-                    this.model.set('totalPage', totalPage);
-                    this.model.set('showList', showList);
-                }
-            });
-            var paginatorModel, paginatorView;
+            var panigator=new Backbone.UI.Panigator()
 
             var memberItemCollection = new MemberItemCollection();
             var memberModel = new MemberItemModel();
@@ -233,8 +185,8 @@
                             page: page
                         },
                         success: function(collection, res) {
-                            if (!paginatorView) {
-                                paginatorModel = new PaginatorModel({
+                            if (!panigator.isInit) {
+                                panigator.init({
                                     size: res.size,
                                     currentPage: res.currentPage,
                                     total: res.total,
@@ -242,15 +194,12 @@
                                         self._load(page)
                                     }
                                 })
-                                paginatorView = new PaginatorView({
-                                    model: paginatorModel
-                                });
                             } else {
-                                paginatorModel.set('size', res.size)
-                                paginatorModel.set('currentPage', res.currentPage)
-                                paginatorModel.set('total', res.total)
+                                panigator.model.set('size', res.size)
+                                panigator.model.set('currentPage', res.currentPage)
+                                panigator.model.set('total', res.total)
                             }
-                            paginatorView.render(page);
+                            panigator.view.render(page);
                             self.renderList();
                         },
                         error: function(error) {
