@@ -168,10 +168,9 @@
                 },
             });
 
-            var panigator=new Backbone.UI.Panigator()
+            var panigator=new Backbone.UI.Panigator();
 
             var memberItemCollection = new MemberItemCollection();
-            var memberModel = new MemberItemModel();
             var AppView = Backbone.View.extend({
                 el: 'body',
                 initialize: function() {

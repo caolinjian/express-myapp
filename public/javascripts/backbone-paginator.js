@@ -6,11 +6,12 @@
 
     Backbone.UI = Backbone.UI || {};
     var templateSettings = _.templateSettings;
-    _.templateSettings = {
+    var defaultSetting={
         evaluate: /<%([\s\S]+?)%>/g,
         interpolate: /<%=([\s\S]+?)%>/g,
         escape: /<%-([\s\S]+?)%>/g
     };
+
     var templeHTML = '<a class="<%= currentPage==1?\'pageA disable\':\'pageA\' %>" data-index="1">' +
         '<span>首页</span>' +
         '</a>' +
@@ -20,9 +21,7 @@
         '<% for(var i=0;i<showList.length;i++){ %>' +
         '<a class="<%= currentPage==showList[i]?\'pageA pageActive disable\':\'pageA\' %>" data-index="<%=' +
         ' showList[i] %>">' +
-        '< span > ' +
-        '<%= showList[i] %>' +
-        '</span>' +
+        '<span><%= showList[i] %></span>' +
         '</a>' +
         '<% } %>' +
         '<a class="<%= currentPage==totalPage?\'pageA disable\':\'pageA\' %>" data-index="<%= currentPage+1 %>">' +
@@ -48,7 +47,6 @@
             events: {
                 'click .pageA': 'changePage'
             },
-            template: _.template($('#paginator').html()),
             initialize: function () {
                 var self = this;
                 self.setTotalPage();
@@ -63,7 +61,9 @@
                 this.model.attributes.pageChange($(ev.currentTarget).data('index'))
             },
             render: function (page) {
-                this.$el.html(this.template(this.model.toJSON()));
+                _.templateSettings = defaultSetting;
+                this.$el.html(_.template(templeHTML)(this.model.toJSON()));
+                _.templateSettings = templateSettings
             },
             setTotalPage: function () {
                 var showList = [];
