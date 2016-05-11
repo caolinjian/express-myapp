@@ -5,8 +5,7 @@
     if (typeof Backbone === 'undefined') alert('backbone environment not loaded');
 
     Backbone.UI = Backbone.UI || {};
-    var templateSettings = _.templateSettings;
-    var defaultSetting={
+    var templateSetting={
         evaluate: /<%([\s\S]+?)%>/g,
         interpolate: /<%=([\s\S]+?)%>/g,
         escape: /<%-([\s\S]+?)%>/g
@@ -50,7 +49,7 @@
             initialize: function () {
                 var self = this;
                 self.setTotalPage();
-                self.model.bind('change', function () {
+                self.model.bind('change currentPage', function () {
                     self.setTotalPage();
                 });
             },
@@ -61,9 +60,7 @@
                 this.model.attributes.pageChange($(ev.currentTarget).data('index'))
             },
             render: function (page) {
-                _.templateSettings = defaultSetting;
-                this.$el.html(_.template(templeHTML)(this.model.toJSON()));
-                _.templateSettings = templateSettings
+                this.$el.html(_.template(templeHTML,templateSetting)(this.model.toJSON()));
             },
             setTotalPage: function () {
                 var showList = [];
@@ -88,11 +85,12 @@
             }
         });
         this.init = function (options) {
-            this.model = new PanigatorModel(options);
-            this.view= new PanigatorView({
-                model: this.model
+            var self=this;
+            self.model = new PanigatorModel(options);
+            self.view= new PanigatorView({
+                model: self.model
             });
-            this.isInit=true;
+            self.isInit=true;
         }
     }
 })()
